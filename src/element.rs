@@ -32,18 +32,24 @@ impl Element {
 
     /// Get the mass of the element averaged over the existing isotopes, weighted by their
     /// abundance
+    /// Average_Mass = Sum(Abundance * Mass) / Sum(Abundance)
     pub fn mass(&self) -> UncertainFloat {
         let mut average_mass = 0.0;
         let mut average_uncertainty = 0.0;
         let mut summed_weights = 0.0;
         for isotope in self.isotopes.iter() {
             average_mass += isotope.abundance.value*isotope.mass.value;
-            average_uncertainty += (isotope.abundance.value*isotope.mass.value).powi(2);
+            average_uncertainty += (isotope.abundance.value*isotope.mass.uncertainty).powi(2);
             summed_weights += isotope.abundance.value;
         }
         average_mass /= summed_weights;
-        average_uncertainty = average_uncertainty.sqrt() / summed_weights;
-        UncertainFloat::new(average_mass, average_uncertainty)
+        
+        // add uncertainty of abundance values
+        for isotope in self.isotopes.iter() {
+            average_uncertainty += (isotope.mass.value.powi(2)/summed_weights.powi(2) + average_mass.powi(2))*isotope.abundance.uncertainty.powi(2);
+        }
+        average_uncertainty /= summed_weights.powi(2);
+        UncertainFloat::new(average_mass, average_uncertainty.sqrt())
     }
 
     /// Get the isotope mass. If the mass number is not present in the data for the given

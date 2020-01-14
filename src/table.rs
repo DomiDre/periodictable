@@ -166,3 +166,16 @@ fn create_periodic_table() {
     assert_eq!(iron.name, "Iron");
 
 }
+
+#[test]
+fn check_hydrogen_mass() {
+    let table = PeriodicTable::new();
+    let hydrogen = &table.elements[1];
+    let hydrogen_mass = hydrogen.mass();
+    if (hydrogen_mass.value - 1.007_9).abs() > 0.000_1 {
+        panic!("Hydrogen average mass value incorrect.");
+    }
+    if (hydrogen_mass.uncertainty - 0.000_1).abs() > 0.000_1 {
+        panic!("Hydrogen average mass uncertainty incorrect.");
+    }
+}
