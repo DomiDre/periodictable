@@ -41,7 +41,7 @@ impl Element {
             average_uncertainty += (isotope.abundance.value*isotope.mass.value).powi(2);
             summed_weights += isotope.abundance.value;
         }
-        average_mass = average_mass / summed_weights;
+        average_mass /= summed_weights;
         average_uncertainty = average_uncertainty.sqrt() / summed_weights;
         UncertainFloat::new(average_mass, average_uncertainty)
     }
