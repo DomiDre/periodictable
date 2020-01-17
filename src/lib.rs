@@ -3,6 +3,7 @@
 pub mod isotope;
 pub mod element;
 pub mod elements;
+pub mod xray_sf;
 pub mod neutron_sf;
 pub mod table;
 pub mod utils;
@@ -10,6 +11,7 @@ pub mod utils;
 use element::Element;
 use isotope::Isotope;
 use utils::UncertainFloat;
+use xray_sf::XrayScatteringFactor;
 use neutron_sf::NeutronScatteringFactor;
 
 // use element_basic_info::ElementBasicInfo;

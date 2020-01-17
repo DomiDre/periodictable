@@ -23,10 +23,14 @@ def uncertain_number(num:str) -> str:
     
     splitted_num = num.split('(')
     value = splitted_num[0]
-
+    if value == "0":
+        value = "0.0"
+    if "<" in value:
+        value = "0.0"
     # if no uncertainty present (no brackets) -> return 0 uncertainty
     if len(splitted_num) == 1:
-        return value+", 0.0"
+        
+        return f'UncertainFloat::new({value}, 0.0)'
     # else
     uncertainty = splitted_num[1].split(')')[0]
 
@@ -41,14 +45,33 @@ def uncertain_number(num:str) -> str:
     print_uncertainty += uncertainty
     return "UncertainFloat::new(" + insert_underscores(value)+"_f64" + ", " + insert_underscores(print_uncertainty)+"_f64)"
 
+def option_uncertain_number(num: str) -> str:
+    """String can be either an uncertain number or None
+    """
+    if num is None:
+        return "None"
+    else:
+        return f"Some({uncertain_number(num)})"
+
+def neutron_sf(b_c, b_p, b_m, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life, intendation_level):
+    return (
+        "Some(NeutronScatteringFactor {\n"+
+        " "*intendation_level + f"b_c: {uncertain_number(b_c)},\n"+
+        " "*intendation_level + f"b_p: {option_uncertain_number(b_p)},\n"+
+        " "*intendation_level + f"b_m: {option_uncertain_number(b_m)},\n"+
+        " "*intendation_level + f"coherent_scattering_xs: {option_uncertain_number(xs_coh)},\n"+
+        " "*intendation_level + f"incoherent_scattering_xs: {option_uncertain_number(xs_incoh)},\n"+
+        " "*intendation_level + f"absorption_scattering_xs: {option_uncertain_number(xs_total)},\n"+
+        " "*intendation_level + f"thermal_absorption_xs: {option_uncertain_number(xs_thermal_absorption)},\n"+
+        " "*(intendation_level-4) + "}),"
+    )
+
 # load mass data including uncertainties
 isotope_masses = {}
 for line in periodictable.mass.massdata.split('\n'):
     isotope, mass, abundance, average_mass = line.split(',')
     isotope_masses[isotope] = (mass, abundance, average_mass)
 
-# nsftable = periodictable.nsf.nsftable
-print()
 elements_nsf = {}
 isotopes_nsf = {}
 atom_counter = 0
@@ -71,17 +94,31 @@ for line in nsf_to_rust.nsftable.split('\n'):
         abundance = abundance_or_half_life
         half_life = "0.0"
 
+    if bp == "":
+        bp = None
+    if bm == "":
+        bm = None
+    if xs_coh == "":
+        xs_coh = None
+    if xs_incoh == "":
+        xs_incoh = None
+    if xs_total == "":
+        xs_total = None
+    if xs_thermal_absorption == "":
+        xs_thermal_absorption = None
+    
     is_plus_minus = "false"
     has_strong_energy_dependence = "false"
     if special_symbol == "+/-":
         is_plus_minus = "true"
     if special_symbol == "E":
         has_strong_energy_dependence = "true"
+    
 
     if is_element:
         elements_nsf[symbol] = (b_c, bp, bm, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life)
     else:
-        isotopes_nsf[symbol] = (b_c, bp, bm, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life)
+        isotopes_nsf[f'{symbol}-{mass_number}'] = (b_c, bp, bm, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life)
 
 for element in periodictable.elements:
     if not element.symbol in elements_nsf:
@@ -94,34 +131,26 @@ if True:
         with open(f"element_files/{symbol}.rs", "w") as f:
             f.write(
     """use crate::Element;
-    use crate::{Isotope, UncertainFloat, NeutronScatteringFactor};
+use crate::{Isotope, UncertainFloat, NeutronScatteringFactor};
 
-    pub fn load() -> Element {
-        Element {
-            atomic_number: """+str(atomic_number)+""",
-            name: \"""" + name + """\",
-            symbol: \"""" + symbol + """\",
-            mass: """+ str(float(periodictable.mass.mass(element))) +""",
-            common_ions: vec![-1, 1],
-            oxidation_states: vec![],
-            neutron_b_coherent: """)
-            
+pub fn load() -> Element {
+    Element {
+        atomic_number: """+str(atomic_number)+""",
+        name: \"""" + name + """\",
+        symbol: \"""" + symbol + """\",
+        mass: """+ str(float(periodictable.mass.mass(element))) +""",
+        common_ions: vec![-1, 1],
+        oxidation_states: vec![],
+        xray_scattering: None,
+        neutron_scattering: """)
+        
             if elements_nsf[symbol] is None:
                 f.write("None,\n")
             else:
-                b_c, bp, bm, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life = elements_nsf[symbol]
-                f.write("""NeutronScatteringFactor {
-                    b_c: """ + uncertain_number(b_c) + """
-                    b_p:
-                    b_m:
-                    coherent_scattering_xs:
-                    incoherent_scattering_xs:
-                    absorption_scattering_xs:
-                    thermal_absorption_xs:
-                }""")
+                b_c, b_p, b_m, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life = elements_nsf[symbol]
+                f.write(neutron_sf(*elements_nsf[symbol], 12))
             f.write("""
-            isotopes:
-                vec![""")
+        isotopes: vec![""")
             for mass_number in element.isotopes:
                 isotope = periodictable.elements.isotope(f"{mass_number}-{symbol}")
                 mass = periodictable.mass.mass(isotope)
@@ -129,15 +158,21 @@ if True:
                     mass, abundance, average_mass = isotope_masses[f"{atomic_number}-{symbol}-{mass_number}"]
                 except KeyError:
                     continue
+                try:
+                    neutron_scattering = neutron_sf(*isotopes_nsf[f'{symbol}-{mass_number}'], 20)
+                except KeyError:
+                    neutron_scattering = "None"
+
                 f.write("""
-                    Isotope { 
-                        mass_number: """+str(mass_number)+""",
-                        mass: """+ uncertain_number(mass) +""",
-                        abundance: """+ uncertain_number(abundance) +""",
-                        b_coherent: 
-                    },""")
+            Isotope { 
+                mass_number: """+str(mass_number)+""",
+                mass: """+ uncertain_number(mass) +""",
+                abundance: """+ uncertain_number(abundance) +""",
+                xray_scattering: None,
+                neutron_scattering: """ + neutron_scattering + """
+            },""")
             f.write("""
-                ]
-        }
+        ]
     }
-    """)
+}
+""")

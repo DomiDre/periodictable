@@ -1,9 +1,9 @@
-use crate::utils::UncertainFloat;
+use crate::{UncertainFloat, XrayScatteringFactor, NeutronScatteringFactor};
 
-#[derive(Clone)]
 pub struct Isotope {
     pub mass_number: u16,
     pub mass: UncertainFloat,
     pub abundance: UncertainFloat,
-    pub b_coherent: UncertainFloat
+    pub xray_scattering: Option<XrayScatteringFactor>,
+    pub neutron_scattering: Option<NeutronScatteringFactor>
 }
