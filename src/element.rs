@@ -55,10 +55,10 @@ impl Element {
     }
 
     /// Get the atomic scattering factors f1, f2 for X-ray scattering at energy E (in keV)
-    pub fn atomic_scattering_factor(&self, E: f64) -> Option<(Option<f64>, Option<f64>)> {
+    pub fn atomic_scattering_factor(&self, energy: f64) -> Option<(Option<f64>, Option<f64>)> {
         if let Some(xsf) = &self.xray_scattering {
             // Some(&nsf.b_c)
-            xsf.get_f_at_E(E)
+            xsf.get_f_at_energy(energy)
         } else {
             None
         }
