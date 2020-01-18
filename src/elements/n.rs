@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, NeutronScatteringFactor};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 0,
         name: "Neutron",
         symbol: "n",
-        mass: 1.00866491597,
+        mass: 1.008_664_915_97_f64,
         common_ions: vec![],
         uncommon_ions: vec![],
         xray_scattering: None,

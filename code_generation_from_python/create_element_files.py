@@ -4,11 +4,24 @@ import os.path, numpy
 def insert_underscores(num: str) -> str:
     """Given a number, insert underscore every 3 digit after decimal dot
     """
+    # add underscore before .
+    if "." in num:
+        idx = num.index(".")-3
+    else:
+        idx = len(num) - 3
+    while idx > 0:
+        num = num[:idx] + "_" +num[idx:]
+        idx -= 3
 
+    # add underscores after .
     if not "." in num:
         return num
     idx = num.index('.') + 4
-    while idx < len(num):
+    if "e" in num:
+        e_idx = len(num) - num.index('e')
+    else:
+        e_idx = 0
+    while idx < len(num) - e_idx: 
         num = num[:idx] + "_" +num[idx:]
         idx += 3+1
     return num
@@ -31,6 +44,18 @@ def uncertain_number(num:str) -> str:
     if "<" in value:
         value = "0.0"
     value = str(float(value))
+
+    if "e-" in value:
+        significand, exponent = value.split("e-")
+        value = "0."
+        i = 1
+        while i < int(exponent):
+            value += "0"
+            i+=1
+        for char in significand:
+            if char == ".":
+                continue
+            value += char
     # if no uncertainty present (no brackets) -> return 0 uncertainty
     if len(splitted_num) == 1:
         
@@ -142,74 +167,93 @@ for element in periodictable.elements:
         E, f1, f2 = xsf
         elements_xsf[element.symbol] = (E, f1, f2)
 
-if True:
-    for atomic_number, element in periodictable.core.element_base.items():
-        name, symbol, common_ions, uncommon_ions = element
-        element = periodictable.elements.symbol(symbol)
-        with open(f"../src/elements/{symbol}.rs", "w") as f:
-            f.write(
-    """use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+for atomic_number, element in periodictable.core.element_base.items():
+    name, symbol, common_ions, uncommon_ions = element
+    element = periodictable.elements.symbol(symbol)
+    found_xray_info = False
+    found_neutron_info = False
+    found_isotopes = False
 
-pub fn load() -> Element {
+    element_file_content = ""
+    
+    element_file_content +="""pub fn load() -> Element {
     Element {
         atomic_number: """+str(atomic_number)+""",
         name: \"""" + name + """\",
         symbol: \"""" + symbol + """\",
-        mass: """+ str(float(periodictable.mass.mass(element))) +""",
+        mass: """+ insert_underscores(str(float(periodictable.mass.mass(element)))) +"""_f64,
         common_ions: vec!"""+ str(common_ions) +""",
         uncommon_ions: vec!"""+ str(uncommon_ions) +""",
-        xray_scattering: """)
-            if symbol not in elements_xsf:
-                f.write("None")
+        xray_scattering: """
+    if symbol not in elements_xsf:
+        element_file_content +="None"
+    else:
+        found_xray_info = True
+        element_file_content +="""Some(XrayScatteringFactor {
+            table: vec![\n"""
+        E, f1, f2 = elements_xsf[symbol]
+        for i in range(len(E)):
+            if numpy.isnan(f1[i]):
+                print_f1 = "None"
             else:
-                f.write("""Some(XrayScatteringFactor {
-            table: vec![\n""")
-                E, f1, f2 = elements_xsf[symbol]
-                for i in range(len(E)):
-                    if numpy.isnan(f1[i]):
-                        print_f1 = "None"
-                    else:
-                        print_f1 = f"Some({f1[i]})"
-                    if numpy.isnan(f2[i]):
-                        print_f2 = "None"
-                    else:
-                        print_f2 = f"Some({f2[i]})"
-                    f.write(" "*16 +"AtomicScatteringFactor { energy: "+f"{E[i]}, f1: {print_f1}, f2: {print_f2} "+"},\n")
-                f.write(" "*12 + """]
-        })""")
-            f.write(""",
-        neutron_scattering: """)
-        
-            if elements_nsf[symbol] is None:
-                f.write("None,\n")
-            else:
-                b_c, b_p, b_m, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life = elements_nsf[symbol]
-                f.write(neutron_sf(*elements_nsf[symbol], 12))
-            f.write("""
-        isotopes: vec![""")
-            for mass_number in element.isotopes:
-                isotope = periodictable.elements.isotope(f"{mass_number}-{symbol}")
-                mass = periodictable.mass.mass(isotope)
-                try:
-                    mass, abundance, average_mass = isotope_masses[f"{atomic_number}-{symbol}-{mass_number}"]
-                except KeyError:
-                    continue
-                try:
-                    neutron_scattering = neutron_sf(*isotopes_nsf[f'{symbol}-{mass_number}'], 20)
-                except KeyError:
-                    neutron_scattering = "None"
+                print_f1 = f"Some({insert_underscores(str(f1[i]))}_f64)"
 
-                f.write("""
+            if numpy.isnan(f2[i]):
+                print_f2 = "None"
+            else:
+                print_f2 = f"Some({insert_underscores(str(f2[i]))}_f64)"
+            element_file_content +=" "*16 +"AtomicScatteringFactor { energy: "
+            element_file_content +=f"{insert_underscores(str(numpy.round(E[i],8)))}_f64, f1: {print_f1}, f2: {print_f2} "+"},\n"
+        element_file_content +=" "*12 + """]
+        })"""
+    element_file_content +=""",
+        neutron_scattering: """
+        
+    if elements_nsf[symbol] is None:
+        element_file_content +="None,\n"
+    else:
+        found_neutron_info = True
+        b_c, b_p, b_m, xs_coh, xs_incoh, xs_total, xs_thermal_absorption, abundance, half_life = elements_nsf[symbol]
+        element_file_content +=neutron_sf(*elements_nsf[symbol], 12)
+    element_file_content +="""
+        isotopes: vec!["""
+    for mass_number in element.isotopes:
+        
+        isotope = periodictable.elements.isotope(f"{mass_number}-{symbol}")
+        mass = periodictable.mass.mass(isotope)
+        try:
+            mass, abundance, average_mass = isotope_masses[f"{atomic_number}-{symbol}-{mass_number}"]
+        except KeyError:
+            continue
+        try:
+            neutron_scattering = neutron_sf(*isotopes_nsf[f'{symbol}-{mass_number}'], 20)
+        except KeyError:
+            neutron_scattering = "None"
+        found_isotopes = True
+        element_file_content +="""
             Isotope { 
                 mass_number: """+str(mass_number)+""",
                 mass: """+ uncertain_number(mass) +""",
                 abundance: """+ uncertain_number(abundance) +""",
                 xray_scattering: None,
                 neutron_scattering: """ + neutron_scattering + """
-            },""")
-            f.write("""
+            },"""
+    element_file_content +="""
         ]
     }
 }
-""")
+"""
+    element_file_content = "\n" + element_file_content
+    import_line = "use crate::{UncertainFloat"
+    if found_isotopes:
+        import_line +=", Isotope"
+    if found_xray_info:
+        import_line +=", AtomicScatteringFactor, XrayScatteringFactor"
+    if found_neutron_info:
+        import_line += ", NeutronScatteringFactor"
+
+    element_file_content = import_line + "};\n" + element_file_content
+    element_file_content = "use crate::Element;\n" + element_file_content
+
+    with open(f"../src/elements/{symbol}.rs", "w") as f:
+        f.write(element_file_content)

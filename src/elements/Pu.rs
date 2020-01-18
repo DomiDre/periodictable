@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope, NeutronScatteringFactor};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 94,
         name: "Plutonium",
         symbol: "Pu",
-        mass: 244.0,
+        mass: 244.0_f64,
         common_ions: vec![4],
         uncommon_ions: vec![2, 3, 5, 6, 7],
         xray_scattering: None,
@@ -17,7 +17,7 @@ pub fn load() -> Element {
             bound_coherent_scattering_xs: Some(UncertainFloat::new(7.5_f64, 0.2_f64)),
             bound_incoherent_scattering_xs: Some(UncertainFloat::new(0.2_f64, 0.6_f64)),
             total_bound_scattering_xs: Some(UncertainFloat::new(7.7_f64, 0.6_f64)),
-            absorption_xs: Some(UncertainFloat::new(1017.3_f64, 2.1_f64)),
+            absorption_xs: Some(UncertainFloat::new(1_017.3_f64, 2.1_f64)),
         }),
         isotopes: vec![
             Isotope { 

@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 111,
         name: "Roentgenium",
         symbol: "Rg",
-        mass: 272.0,
+        mass: 272.0_f64,
         common_ions: vec![],
         uncommon_ions: vec![],
         xray_scattering: None,

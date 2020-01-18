@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope, NeutronScatteringFactor};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 96,
         name: "Curium",
         symbol: "Cm",
-        mass: 247.0,
+        mass: 247.0_f64,
         common_ions: vec![3],
         uncommon_ions: vec![4, 6],
         xray_scattering: None,

@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 116,
         name: "Livermorium",
         symbol: "Lv",
-        mass: 293.0,
+        mass: 293.0_f64,
         common_ions: vec![],
         uncommon_ions: vec![],
         xray_scattering: None,

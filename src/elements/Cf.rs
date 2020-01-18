@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 98,
         name: "Californium",
         symbol: "Cf",
-        mass: 251.0,
+        mass: 251.0_f64,
         common_ions: vec![3],
         uncommon_ions: vec![2, 4],
         xray_scattering: None,

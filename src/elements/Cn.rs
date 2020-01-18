@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 112,
         name: "Copernicium",
         symbol: "Cn",
-        mass: 285.0,
+        mass: 285.0_f64,
         common_ions: vec![2],
         uncommon_ions: vec![],
         xray_scattering: None,

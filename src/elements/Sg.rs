@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 106,
         name: "Seaborgium",
         symbol: "Sg",
-        mass: 266.0,
+        mass: 266.0_f64,
         common_ions: vec![6],
         uncommon_ions: vec![],
         xray_scattering: None,

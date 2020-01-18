@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 110,
         name: "Darmstadtium",
         symbol: "Ds",
-        mass: 281.0,
+        mass: 281.0_f64,
         common_ions: vec![],
         uncommon_ions: vec![],
         xray_scattering: None,

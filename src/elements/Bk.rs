@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 97,
         name: "Berkelium",
         symbol: "Bk",
-        mass: 247.0,
+        mass: 247.0_f64,
         common_ions: vec![3],
         uncommon_ions: vec![4],
         xray_scattering: None,

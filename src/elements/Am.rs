@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope, NeutronScatteringFactor};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 95,
         name: "Americium",
         symbol: "Am",
-        mass: 243.0,
+        mass: 243.0_f64,
         common_ions: vec![3],
         uncommon_ions: vec![2, 4, 5, 6, 7],
         xray_scattering: None,

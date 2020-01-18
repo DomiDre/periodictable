@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 101,
         name: "Mendelevium",
         symbol: "Md",
-        mass: 258.0,
+        mass: 258.0_f64,
         common_ions: vec![3],
         uncommon_ions: vec![2],
         xray_scattering: None,

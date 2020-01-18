@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 105,
         name: "Dubnium",
         symbol: "Db",
-        mass: 262.0,
+        mass: 262.0_f64,
         common_ions: vec![5],
         uncommon_ions: vec![],
         xray_scattering: None,

@@ -1,12 +1,12 @@
 use crate::Element;
-use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope};
 
 pub fn load() -> Element {
     Element {
         atomic_number: 107,
         name: "Bohrium",
         symbol: "Bh",
-        mass: 264.0,
+        mass: 264.0_f64,
         common_ions: vec![7],
         uncommon_ions: vec![],
         xray_scattering: None,
