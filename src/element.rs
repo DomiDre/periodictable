@@ -9,5 +9,5 @@ pub struct Element {
     pub xray_scattering: Option<XrayScatteringFactor>,
     pub neutron_scattering: Option<NeutronScatteringFactor>,
     pub common_ions: Vec<i8>,
-    pub oxidation_states: Vec<i8>
+    pub uncommon_ions: Vec<i8>
 }

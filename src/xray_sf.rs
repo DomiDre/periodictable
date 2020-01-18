@@ -1,11 +1,9 @@
-use crate::utils::UncertainFloat;
+pub struct AtomicScatteringFactor {
+    pub energy: f64,
+    pub f1: Option<f64>,
+    pub f2: Option<f64>
+}
 
 pub struct XrayScatteringFactor {
-    // b_c: UncertainFloat,
-    // b_p: Option<UncertainFloat>,
-    // b_m: Option<UncertainFloat>,
-    // coherent_scattering_xs: Option<UncertainFloat>,
-    // incoherent_scattering_xs: Option<UncertainFloat>,
-    // absorption_scattering_xs: Option<UncertainFloat>,
-    // thermal_absorption_xs: Option<UncertainFloat>
+    pub table: Vec<AtomicScatteringFactor> // E, f1, f2
 }

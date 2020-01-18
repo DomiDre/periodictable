@@ -1,5 +1,6 @@
 import periodictable
 import nsf_to_rust
+import os.path, numpy
 def insert_underscores(num: str) -> str:
     """Given a number, insert underscore every 3 digit after decimal dot
     """
@@ -25,8 +26,11 @@ def uncertain_number(num:str) -> str:
     value = splitted_num[0]
     if value == "0":
         value = "0.0"
+    elif value == "100":
+        value = "100.0"
     if "<" in value:
         value = "0.0"
+    value = str(float(value))
     # if no uncertainty present (no brackets) -> return 0 uncertainty
     if len(splitted_num) == 1:
         
@@ -43,6 +47,8 @@ def uncertain_number(num:str) -> str:
             while len(print_uncertainty) - 2 < num_digits_after_dot - len(uncertainty):
                 print_uncertainty += "0"
     print_uncertainty += uncertainty
+    if print_uncertainty.endswith("."):
+        print_uncertainty = print_uncertainty[:-1]
     return "UncertainFloat::new(" + insert_underscores(value)+"_f64" + ", " + insert_underscores(print_uncertainty)+"_f64)"
 
 def option_uncertain_number(num: str) -> str:
@@ -59,10 +65,10 @@ def neutron_sf(b_c, b_p, b_m, xs_coh, xs_incoh, xs_total, xs_thermal_absorption,
         " "*intendation_level + f"b_c: {uncertain_number(b_c)},\n"+
         " "*intendation_level + f"b_p: {option_uncertain_number(b_p)},\n"+
         " "*intendation_level + f"b_m: {option_uncertain_number(b_m)},\n"+
-        " "*intendation_level + f"coherent_scattering_xs: {option_uncertain_number(xs_coh)},\n"+
-        " "*intendation_level + f"incoherent_scattering_xs: {option_uncertain_number(xs_incoh)},\n"+
-        " "*intendation_level + f"absorption_scattering_xs: {option_uncertain_number(xs_total)},\n"+
-        " "*intendation_level + f"thermal_absorption_xs: {option_uncertain_number(xs_thermal_absorption)},\n"+
+        " "*intendation_level + f"bound_coherent_scattering_xs: {option_uncertain_number(xs_coh)},\n"+
+        " "*intendation_level + f"bound_incoherent_scattering_xs: {option_uncertain_number(xs_incoh)},\n"+
+        " "*intendation_level + f"total_bound_scattering_xs: {option_uncertain_number(xs_total)},\n"+
+        " "*intendation_level + f"absorption_xs: {option_uncertain_number(xs_thermal_absorption)},\n"+
         " "*(intendation_level-4) + "}),"
     )
 
@@ -124,14 +130,26 @@ for element in periodictable.elements:
     if not element.symbol in elements_nsf:
         elements_nsf[element.symbol] = None
 
+elements_xsf = {}
+_nff_path = "./xsf/"
+for element in periodictable.elements:
+    # read xsf datei
+    filename = os.path.join(_nff_path, element.symbol.lower()+".nff")
+    if element.symbol != 'n' and os.path.exists(filename):
+        xsf = numpy.loadtxt(filename, skiprows=1).T
+        xsf[1, xsf[1] == -9999.] = None
+        xsf[0] *= 0.001  # Use keV in table rather than eV
+        E, f1, f2 = xsf
+        elements_xsf[element.symbol] = (E, f1, f2)
+
 if True:
     for atomic_number, element in periodictable.core.element_base.items():
-        name, symbol, oxidation_state, common_ions = element
+        name, symbol, common_ions, uncommon_ions = element
         element = periodictable.elements.symbol(symbol)
-        with open(f"element_files/{symbol}.rs", "w") as f:
+        with open(f"../src/elements/{symbol}.rs", "w") as f:
             f.write(
     """use crate::Element;
-use crate::{Isotope, UncertainFloat, NeutronScatteringFactor};
+use crate::{Isotope, UncertainFloat, AtomicScatteringFactor, XrayScatteringFactor, NeutronScatteringFactor};
 
 pub fn load() -> Element {
     Element {
@@ -139,9 +157,28 @@ pub fn load() -> Element {
         name: \"""" + name + """\",
         symbol: \"""" + symbol + """\",
         mass: """+ str(float(periodictable.mass.mass(element))) +""",
-        common_ions: vec![-1, 1],
-        oxidation_states: vec![],
-        xray_scattering: None,
+        common_ions: vec!"""+ str(common_ions) +""",
+        uncommon_ions: vec!"""+ str(uncommon_ions) +""",
+        xray_scattering: """)
+            if symbol not in elements_xsf:
+                f.write("None")
+            else:
+                f.write("""Some(XrayScatteringFactor {
+            table: vec![\n""")
+                E, f1, f2 = elements_xsf[symbol]
+                for i in range(len(E)):
+                    if numpy.isnan(f1[i]):
+                        print_f1 = "None"
+                    else:
+                        print_f1 = f"Some({f1[i]})"
+                    if numpy.isnan(f2[i]):
+                        print_f2 = "None"
+                    else:
+                        print_f2 = f"Some({f2[i]})"
+                    f.write(" "*16 +"AtomicScatteringFactor { energy: "+f"{E[i]}, f1: {print_f1}, f2: {print_f2} "+"},\n")
+                f.write(" "*12 + """]
+        })""")
+            f.write(""",
         neutron_scattering: """)
         
             if elements_nsf[symbol] is None:

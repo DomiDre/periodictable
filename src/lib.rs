@@ -11,7 +11,7 @@ pub mod utils;
 use element::Element;
 use isotope::Isotope;
 use utils::UncertainFloat;
-use xray_sf::XrayScatteringFactor;
+use xray_sf::{AtomicScatteringFactor, XrayScatteringFactor};
 use neutron_sf::NeutronScatteringFactor;
 
 // use element_basic_info::ElementBasicInfo;

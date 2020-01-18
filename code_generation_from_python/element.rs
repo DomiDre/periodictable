@@ -7,7 +7,7 @@ pub struct Element {
     pub name: &'static str,
     pub symbol: &'static str,
     pub common_ions: Vec<i8>,
-    pub oxidation_states: Vec<i8>,
+    pub uncommon_ions: Vec<i8>,
     pub isotopes: Vec<Mass>
 }
 
@@ -17,7 +17,7 @@ impl Element {
         name: &'static str,
         symbol: &'static str,
         common_ions: Vec<i8>,
-        oxidation_states: Vec<i8>,
+        uncommon_ions: Vec<i8>,
     ) -> Element {
         
         Element {
@@ -25,7 +25,7 @@ impl Element {
             name,
             symbol,
             common_ions,
-            oxidation_states,
+            uncommon_ions,
             isotopes: Vec::new()
         }
     }
