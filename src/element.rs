@@ -1,4 +1,4 @@
-use crate::{UncertainFloat, Isotope, XrayScatteringFactor, NeutronScatteringFactor};
+use crate::{UncertainFloat, Isotope, XrayScatteringFactor, AtomicScatteringFactor, NeutronScatteringFactor};
 
 pub struct Element {
     pub atomic_number: u8,
@@ -55,7 +55,7 @@ impl Element {
     }
 
     /// Get the atomic scattering factors f1, f2 for X-ray scattering at energy E (in keV)
-    pub fn atomic_scattering_factor(&self, energy: f64) -> Option<(Option<f64>, Option<f64>)> {
+    pub fn atomic_scattering_factor(&self, energy: f64) -> Option<AtomicScatteringFactor> {
         if let Some(xsf) = &self.xray_scattering {
             // Some(&nsf.b_c)
             xsf.get_f_at_energy(energy)

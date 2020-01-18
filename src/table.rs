@@ -174,3 +174,23 @@ fn check_hydrogen_mass() {
         panic!("Hydrogen average mass value incorrect.");
     }
 }
+
+#[test]
+fn check_iron_scattering() {
+    let table = PeriodicTable::new();
+    let iron = &table.elements[26];
+    let b_c = iron.b_c().unwrap();
+    let xsf = iron.atomic_scattering_factor(10.0).unwrap();
+    let f1 = xsf.f1.unwrap();
+    let f2 = xsf.f2.unwrap();
+    if (b_c.value - 9.45).abs() > 0.000_1 {
+        panic!("Iron bound coherence length odd");
+    }
+
+    if (f1 - 25.975).abs() > 0.000_1 {
+        panic!("Iron f1 odd: {}", f1);
+    }
+    if (f2 - 2.2671).abs() > 0.000_1 {
+        panic!("Iron f2 odd: {}", f2);
+    }
+}
