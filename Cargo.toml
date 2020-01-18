@@ -5,7 +5,7 @@ authors = ["Dominique Dresen <dominique@dresen.codes>"]
 edition = "2018"
 description = "Library containing physical properties of the periodic elements"
 license = "MIT/Apache-2.0"
-repository = "https://github.com/domidre/periodic_table"
+repository = "https://github.com/domidre/periodictable"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
