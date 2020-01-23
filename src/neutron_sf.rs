@@ -1,5 +1,6 @@
 use crate::UncertainFloat;
 
+#[derive(Debug, Clone, Copy)]
 pub struct NeutronScatteringFactor {
     pub b_c: UncertainFloat, //bound coherent scattering length (in fm)
     pub b_p: Option<UncertainFloat>, 

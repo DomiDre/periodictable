@@ -8,11 +8,11 @@ pub mod neutron_sf;
 pub mod table;
 pub mod utils;
 
-use element::Element;
-use isotope::Isotope;
-use utils::UncertainFloat;
-use xray_sf::{AtomicScatteringFactor, XrayScatteringFactor};
-use neutron_sf::NeutronScatteringFactor;
+pub use element::Element;
+pub use isotope::Isotope;
+pub use utils::UncertainFloat;
+pub use xray_sf::{AtomicScatteringFactor, XrayScatteringFactor};
+pub use neutron_sf::NeutronScatteringFactor;
 
 // use element_basic_info::ElementBasicInfo;
 // use element_neutron_scattering::ElementNeutronScattering;

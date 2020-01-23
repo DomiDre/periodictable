@@ -1,5 +1,6 @@
 use crate::{UncertainFloat, Isotope, XrayScatteringFactor, AtomicScatteringFactor, NeutronScatteringFactor};
 
+#[derive(Debug, Clone)]
 pub struct Element {
     pub atomic_number: u8,
     pub name: &'static str,
