@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-#[derive(Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct UncertainFloat {
     pub value: f64,
     pub uncertainty: f64
